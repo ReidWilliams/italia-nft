@@ -89,7 +89,7 @@ contract Italia is ERC721Enumerable, ReentrancyGuard, Ownable {
     // Not index of allStickers
     function removeSticker(uint256 stickerId, uint256 tokenId) public nonReentrant {
         require(_isApprovedOrOwner(_msgSender(), tokenId), "You're not the owner of this NFT");
-        _tokenMapToStickerInstances[tokenId][tokenId].isDeleted = true;
+        _tokenMapToStickerInstances[tokenId][stickerId].isDeleted = true;
     } 
 
     function toString(uint256 value) internal pure returns (string memory) {
