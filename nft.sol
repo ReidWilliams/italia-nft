@@ -8,6 +8,7 @@ struct StickerInstance {
     uint256 x;
     uint256 y;
     uint256 id;
+    bool isDeleted;
 }
 
 contract Italia is ERC721Enumerable, ReentrancyGuard, Ownable {
@@ -29,9 +30,13 @@ contract Italia is ERC721Enumerable, ReentrancyGuard, Ownable {
         for (uint i=0; i < stickerInstances.length; i++) {
             StickerInstance memory sticker = stickerInstances[i];
 
-            stickerSVGs = string.concat(stickerSVGs, '<g transform="translate(', toString(sticker.x), ', ', toString(sticker.y), ')">');
-            stickerSVGs = string.concat(stickerSVGs, _allStickers[sticker.id]);
-            stickerSVGs = string.concat(stickerSVGs, '</g>');
+            stickerSVGs = string.concat(stickerSVGs, '<!--', toString(i), '-->');
+            
+            if (!sticker.isDeleted) {
+                stickerSVGs = string.concat(stickerSVGs, '<g transform="translate(', toString(sticker.x), ', ', toString(sticker.y), ')">');
+                stickerSVGs = string.concat(stickerSVGs, _allStickers[sticker.id]);
+                stickerSVGs = string.concat(stickerSVGs, '</g>');  
+            }
         }
 
         stickerSVGs = string.concat(stickerSVGs, suffix);
@@ -77,7 +82,14 @@ contract Italia is ERC721Enumerable, ReentrancyGuard, Ownable {
         uint256 y, 
         uint256 tokenId) internal nonReentrant {
         require(stickerId < _allStickers.length, "That sticker doesn't exist");
-        _tokenMapToStickerInstances[tokenId].push(StickerInstance(x, y, stickerId));
+        _tokenMapToStickerInstances[tokenId].push(StickerInstance(x, y, stickerId, false));
+    } 
+
+    // StickerId is order of sticker for this particular token
+    // Not index of allStickers
+    function removeSticker(uint256 stickerId, uint256 tokenId) public nonReentrant {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "You're not the owner of this NFT");
+        _tokenMapToStickerInstances[tokenId][tokenId].isDeleted = true;
     } 
 
     function toString(uint256 value) internal pure returns (string memory) {
