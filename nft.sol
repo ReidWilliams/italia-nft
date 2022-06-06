@@ -19,7 +19,7 @@ contract Italia is ERC721Enumerable, ReentrancyGuard, Ownable {
     mapping(uint256 => StickerInstance[]) public _tokenMapToStickerInstances;
 
     function tokenURI(uint256 tokenId) override public view returns (string memory) {
-        string memory prefix = "<svg width='350' height='350' viewBox='0 0 350 350' fill='none' xmlns='http://www.w3.org/2000/svg'><rect width='97' height='100' fill='#D9D9D9'/><path d='M50.5 20L57.3477 41.075H79.5072L61.5798 54.1L68.4275 75.175L50.5 62.15L32.5725 75.175L39.4202 54.1L21.4928 41.075H43.6523L50.5 20Z' fill='#F21F1F'/>";
+        string memory prefix = '<svg width="600" height="600" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="600" fill="url(#paint0_radial_311_353)"/><rect x="53" y="232" width="493" height="308" rx="20" fill="#999999"/><defs><radialGradient id="paint0_radial_311_353" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(300 -26.4999) rotate(91.5182) scale(490.672)"><stop stop-color="#2184DF"/><stop offset="1" stop-color="#EBB2DB"/></radialGradient></defs>';
         string memory suffix = '</svg>';
 
         string memory stickerSVGs = prefix;
@@ -51,13 +51,32 @@ contract Italia is ERC721Enumerable, ReentrancyGuard, Ownable {
         _allStickers.push(svgCode);
     }
 
-    function addStickerToToken(
+    function addStickerToLaptop(
         uint256 stickerId, 
         uint256 x, 
         uint256 y, 
-        uint256 tokenId) 
-    public nonReentrant {
-        // TODO, error if sticker id doesn't exist
+        uint256 tokenId) public {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "You're not the owner of this NFT");
+        require(stickerId > 0, "Sticker 0 is special");
+
+        _addStickerToToken(stickerId, x, y, tokenId);
+    }
+
+    function adminOnlyaddStickerToToken (
+        uint256 stickerId, 
+        uint256 x, 
+        uint256 y, 
+        uint256 tokenId) public onlyOwner {
+
+        _addStickerToToken(stickerId, x, y, tokenId);
+    }
+
+    function _addStickerToToken(
+        uint256 stickerId, 
+        uint256 x, 
+        uint256 y, 
+        uint256 tokenId) internal nonReentrant {
+        require(stickerId < _allStickers.length, "That sticker doesn't exist");
         _tokenMapToStickerInstances[tokenId].push(StickerInstance(x, y, stickerId));
     } 
 
